@@ -50,3 +50,9 @@ covid_us <- covid_us %>%
   mutate(deaths_prop = Deaths/Confirmed)
 ```
 
+```{r make_pm25_na}
+pm_ave %>%
+  mutate(pm25 = replace(pm25, pm25 == -99.000000, NA)) %>%
+  count(pm25 = "NA")
+```
+
