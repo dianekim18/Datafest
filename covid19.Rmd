@@ -39,3 +39,9 @@ aggregate( fips ~ pm25, county_pm, mean )
 full <- inner_join(covid_us, county_pm, by = "fips")
 ```
 
+```{r deaths-proportion}
+covid_us <- covid_us %>%
+  group_by(Admin2) %>%
+  mutate(deaths_prop = Deaths/Confirmed)
+```
+
