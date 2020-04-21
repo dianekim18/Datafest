@@ -33,6 +33,9 @@ county_pm %>%
 
 covid_us <- covid_us %>%
   mutate(fips = FIPS)
+
+aggregate( fips ~ pm25, county_pm, mean )
+  
 full <- inner_join(covid_us, county_pm, by = "fips")
 ```
 
