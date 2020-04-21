@@ -403,7 +403,41 @@ covid = read.csv(text=getURL(paste0(&quot;https://raw.githubusercontent.com/CSSE
 covid_us = subset(covid,Country_Region == &quot;US&quot; &amp; is.na(FIPS)!=T)
 covid_us = rbind(covid_us,subset(covid_us_hist, (!(FIPS %in% covid_us$FIPS))  &amp; Confirmed == 0 &amp; Deaths == 0 &amp; is.na(FIPS)==F))
 
-county_pm = read.csv(text=getURL(&quot;https://raw.githubusercontent.com/wxwx1993/PM_COVID/master/Data/county_pm25.csv&quot;))</code></pre>
+county_pm = read.csv(text=getURL(&quot;https://raw.githubusercontent.com/wxwx1993/PM_COVID/master/Data/county_pm25.csv&quot;))
+
+pm_ave &lt;- read_csv(&quot;county_pm_ave.csv&quot;)</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   fips = col_integer(),
+##   pm25 = col_double()
+## )</code></pre>
+<pre class="r"><code>dem &lt;- read_csv(&quot;co-est2019-alldata.csv&quot;)</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   .default = col_integer(),
+##   SUMLEV = col_character(),
+##   STATE = col_character(),
+##   COUNTY = col_character(),
+##   STNAME = col_character(),
+##   CTYNAME = col_character(),
+##   RBIRTH2011 = col_double(),
+##   RBIRTH2012 = col_double(),
+##   RBIRTH2013 = col_double(),
+##   RBIRTH2014 = col_double(),
+##   RBIRTH2015 = col_double(),
+##   RBIRTH2016 = col_double(),
+##   RBIRTH2017 = col_double(),
+##   RBIRTH2018 = col_double(),
+##   RBIRTH2019 = col_double(),
+##   RDEATH2011 = col_double(),
+##   RDEATH2012 = col_double(),
+##   RDEATH2013 = col_double(),
+##   RDEATH2014 = col_double(),
+##   RDEATH2015 = col_double(),
+##   RDEATH2016 = col_double()
+##   # ... with 39 more columns
+## )</code></pre>
+<pre><code>## See spec(...) for full column specifications.</code></pre>
 <pre class="r"><code>county_pm %&gt;%
   count(fips)</code></pre>
 <pre><code>## # A tibble: 3,176 x 2
@@ -50426,6 +50460,9 @@ aggregate( fips ~ pm25, county_pm, mean )</code></pre>
 ## 49999 13.4345807 47183.00
 ##  [ reached getOption(&quot;max.print&quot;) -- omitted 2565 rows ]</code></pre>
 <pre class="r"><code>full &lt;- inner_join(covid_us, county_pm, by = &quot;fips&quot;)</code></pre>
+<pre class="r"><code>covid_us &lt;- covid_us %&gt;%
+  group_by(Admin2) %&gt;%
+  mutate(deaths_prop = Deaths/Confirmed)</code></pre>
 
 
 

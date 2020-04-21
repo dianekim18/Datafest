@@ -25,6 +25,11 @@ covid_us = rbind(covid_us,subset(covid_us_hist, (!(FIPS %in% covid_us$FIPS))  & 
 
 county_pm = read.csv(text=getURL("https://raw.githubusercontent.com/wxwx1993/PM_COVID/master/Data/county_pm25.csv"))
 
+pm_ave <- read_csv("county_pm_ave.csv")
+
+dem <- read_csv("co-est2019-alldata.csv")
+
+
 ```
 
 ```{r clean-up-data}
