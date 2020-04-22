@@ -62,22 +62,111 @@ full <- full %>%
   mutate(poverty = 100*poverty, medianhouseholdincome = medianhouseholdincome/1000, medianhousevalue = medianhousevalue/1000, pct_blk = pct_blk*100, pct_asian = pct_asian*100, pct_native = pct_native*100, hispanic = hispanic*100, pct_white = pct_white*100, education = education*100, pct_owner_occ = pct_owner_occ*100)
 ```
 
-```{r eda}
+## Exploratory Data Analysis
+
+## Mortality Rates & Race
+```{r eda-mortality}
 ggplot(data = full, mapping = aes(x = mortality))+
-  geom_histogram()+
-  labs(title = "Distribution of Mortality Rate", x = "Mortality", y = "Frequency")
+  geom_histogram(fill = "#15246b" )+
+  labs(title = "Distribution of Mortality Rate", x = "Mortality", y = "Frequency") +
+  theme_minimal()
 
-ggplot(data = full, mapping = aes(x = poverty))+
-  geom_histogram()+
-  labs(title = "Distribution of Poverty Rate", x = "Poverty Rate (in percentages)", y = "Frequency")
+ggplot(data = full, mapping = aes(x = hispanic, y = mortality)) +
+  geom_point(color = "blue")+
+  labs(title = "The Mortality Rates for Hispanics", 
+       x = "Percent of Hispanic People", y = "Mortality Rate") +
+theme_minimal()
 
-ggplot(data = full, mapping = aes(x = pct_blk, y = poverty))+
-  geom_point()+
-  labs(title = "Relationship between Poverty Rate and Black Population", x = "Percentage of Blacks", y = "Poverty Rate")
+ggplot(data = full, mapping = aes(x = pct_blk, y = mortality)) +
+  geom_point(color = "lightblue")+
+  labs(title = "The Mortality Rates for Blacks", 
+       x = "Percent of Blacks", y = "Mortality Rate") +
+  theme_minimal()
 
+ggplot(data = full, mapping = aes(x = pct_native, y = mortality) )+
+  geom_point(color = "darkblue")+
+  labs(title = "The Mortality Rates for Natives", 
+       x = "Percent of Natives", y = "Mortality Rate") +
+  theme_minimal()
 
 ```
-There seems to be a positive correlation between the percentage of African Americans and the poverty rate.
+
+im confused. why do these all look so wierd??? also what should the title of these be?
+
+
+## Mortality, Home-ownership, & Income
+
+```{r eda-household}
+ggplot(data = full, mapping = aes(x = medianhouseholdincome))+
+  geom_histogram(fill = "darkblue")+
+  labs(title = "Distribution of Median Household Income", 
+       x = "Household Income", y = "Frequency") +
+  theme_minimal()
+
+ggplot(data = full, mapping = aes(x = medianhousevalue)) +
+  geom_histogram(fill = "lightblue") +
+  labs(title = "Distribution of Median House Value", 
+       x = "Median House Value", y = "Frequency") +
+  theme_minimal()
+
+ggplot(data = full, mapping = aes(x = pct_owner_occ, y = mortality)) +
+  geom_point(color = "blue")+
+  labs(title = "The Relationship between Mortality and Owner-Occupied Homes", 
+       x = "Percentage of Owner-Occupied Homes", y = "Mortality") +
+  theme_minimal()
+
+ggplot(data = full, mapping = aes(x = medianhousevalue, y = mortality)) +
+  geom_point(color = "lightblue")+
+  labs(title = "The Relationship between Mortality and Median House Value", 
+         x = "Median Household Value", y = "Mortality") +
+  theme_minimal()
+
+ggplot(data = full, mapping = aes(x = medianhouseholdincome, y = mortality)) +
+  geom_point(color = "darkblue")+
+  labs(title = "The Mortality Rates for Blacks", 
+        x = "Median Household Income", y = "Mortality") +
+  theme_minimal()
+```
+
+## Poverty & Race
+```{r eda-poverty}
+ggplot(data = full, mapping = aes(x = poverty))+
+  geom_histogram(fill = "#15246b") +
+  labs(title = "Distribution of Poverty Rate", 
+       x = "Poverty Rate (in percentages)", y = "Frequency") +
+  theme_minimal()
+
+ggplot(data = full, mapping = aes(x = hispanic, y = poverty))+
+  geom_point(color = "blue")+
+  labs(title = "Relationship between Poverty Rate and Hispanic Population", 
+       x = "Percentage of Hispanics", y = "Poverty Rate") +
+  theme_minimal()
+
+ggplot(data = full, mapping = aes(x = pct_blk, y = poverty))+
+  geom_point(color = "lightblue")+
+  labs(title = "Relationship between Poverty Rate and Black Population", 
+       x = "Percentage of Blacks", y = "Poverty Rate") +
+  theme_minimal()
+
+ggplot(data = full, mapping = aes(x = pct_native, y = poverty))+
+  geom_point(color = "darkblue")+
+  labs(title = "Relationship between Poverty Rate and Native Population", 
+       x = "Percentage of Natives", y = "Poverty Rate") +
+  theme_minimal()
+```
+
+There seems to be a positive correlation between the percentage of African Americans and the poverty rate. Additionally, there seems to be positive correlation between the percentage of Hispanics and the poverty rate.
+
+## Mortality & Poverty
+```{r mortality-poverty}
+ggplot(data = full, mapping = aes(x = poverty, y = mortality))+
+  geom_point(color = "darkblue")+
+  labs(title = "Relationship between Poverty Rate and Mortality Rate", 
+       x = "Poverty Rate", y = "Mortality Rate") +
+  theme_minimal()
+
+```
+
 
 ```{r betareg}
 mod <- betareg(mortality ~ poverty + medianhouseholdincome + medianhousevalue + pct_asian + pct_white + pct_native + education + popdensity + pct_owner_occ + pct_white*education + poverty*pct_blk +poverty*pct_native, data = full)
