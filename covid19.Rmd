@@ -136,14 +136,26 @@ ggplot(data = full, mapping = aes(x = poverty))+
        x = "Poverty Rate (in percentages)", y = "Frequency") +
   theme_minimal()
 
+ggplot(data = full, mapping = aes(x = pct_white))+
+  geom_histogram(fill = "mediumblue") +
+  labs(title = "Distribution of White Population", 
+       x = "Percentage of Whites", y = "Frequency") +
+  theme_minimal()
+
+ggplot(data = full, mapping = aes(x = pct_blk))+
+  geom_histogram(fill="gray") +
+  labs(title = "Distribution of Black Population", 
+       x = "Percentage of Blacks", y = "Frequency") +
+  theme_minimal()
+
 ggplot(data = full, mapping = aes(x = hispanic, y = poverty))+
-  geom_point(color = "blue")+
+  geom_point(color = "mediumblue")+
   labs(title = "Relationship between Poverty Rate and Hispanic Population", 
        x = "Percentage of Hispanics", y = "Poverty Rate") +
   theme_minimal()
 
 ggplot(data = full, mapping = aes(x = pct_blk, y = poverty))+
-  geom_point(color = "lightblue")+
+  geom_point(color = "gray")+
   labs(title = "Relationship between Poverty Rate and Black Population", 
        x = "Percentage of Blacks", y = "Poverty Rate") +
   theme_minimal()
@@ -167,6 +179,8 @@ ggplot(data = full, mapping = aes(x = poverty, y = mortality))+
 
 ```
 
+
+## Regression model
 
 ```{r betareg}
 mod <- betareg(mortality ~ poverty + medianhouseholdincome + medianhousevalue + pct_asian + pct_white + pct_native + education + popdensity + pct_owner_occ + pct_white*education + poverty*pct_blk +poverty*pct_native, data = full)
