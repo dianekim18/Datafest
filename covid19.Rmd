@@ -8,14 +8,15 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r load-packages}
+```{r load-packages, include = FALSE}
 library(tidyverse)
 library("dplyr")
 library(stringr)
 library(RCurl)
 library(betareg)
 ```
-```{r load-data}
+
+```{r load-data, include = FALSE}
 date_of_study = "04-20-2020"
 
 covid_hist = read.csv(text=getURL("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/03-30-2020.csv"))
@@ -29,19 +30,12 @@ county_pm = read.csv(text=getURL("https://raw.githubusercontent.com/wxwx1993/PM_
 
 pm_ave <- read_csv("county_pm_ave.csv")
 
-dem <- read_csv("co-est2019-alldata.csv")
-
 census <- read_csv("census_county_interpolated.csv")
 
 census_ave <- read_csv("census_ave.csv")
-
-
 ```
 
 ```{r clean-up-data}
-county_pm %>%
-  count(fips)
-
 covid_us <- covid_us %>%
   mutate(fips = FIPS)
 
@@ -51,21 +45,21 @@ pm_mean = county_pm %>%
   
 ```
 
-```{r deaths-proportion}
+```{r calculate-mortality}
 covid_us <- covid_us %>%
   group_by(fips) %>%
   mutate(mortality = (1+Deaths)/Confirmed) %>%
   filter(mortality<1 & !is.na(mortality))
 ```
 
-```{r}
+```{r merge-datasets}
 fullset <- inner_join(covid_us, pm_mean, by = "fips")
 ggplot(data = fullset, mapping = aes(x = mortality))+
   geom_histogram()
 
 full <- inner_join(covid_us, census_ave, by = "fips")
 full <- full %>%
-  mutate(poverty = 100*poverty, medianhouseholdincome = medianhouseholdincome/1000, medianhousevalue = medianhousevalue/1000, pct_blk = pct_blk*100, pct_asian = pct_asian*100, pct_native = pct_native*100, hispanic = hispanic*100, pct_white = pct_white*100, education = education*100)
+  mutate(poverty = 100*poverty, medianhouseholdincome = medianhouseholdincome/1000, medianhousevalue = medianhousevalue/1000, pct_blk = pct_blk*100, pct_asian = pct_asian*100, pct_native = pct_native*100, hispanic = hispanic*100, pct_white = pct_white*100, education = education*100, pct_owner_occ = pct_owner_occ*100)
 ```
 
 ```{r eda}
@@ -77,17 +71,19 @@ ggplot(data = full, mapping = aes(x = poverty))+
   geom_histogram()+
   labs(title = "Distribution of Poverty Rate", x = "Poverty Rate (in percentages)", y = "Frequency")
 
-ggplot(data = full, mapping = aes(x = poverty, y = mortality))+
-  geom_point()
+ggplot(data = full, mapping = aes(x = pct_blk, y = poverty))+
+  geom_point()+
+  labs(title = "Relationship between Poverty Rate and Black Population", x = "Percentage of Blacks", y = "Poverty Rate")
 
-ggplot(data = full, mapping = aes(x = pct_asian, y = mortality))+
-  geom_point()
+
 ```
-
+There seems to be a positive correlation between the percentage of African Americans and the poverty rate.
 
 ```{r betareg}
-mod <- betareg(mortality ~ poverty + medianhouseholdincome + medianhousevalue + hispanic + pct_asian + pct_white + pct_native + education + popdensity + poverty*pct_blk +poverty*pct_native, data = full)
+mod <- betareg(mortality ~ poverty + medianhouseholdincome + medianhousevalue + pct_asian + pct_white + pct_native + education + popdensity + pct_owner_occ + pct_white*education + poverty*pct_blk +poverty*pct_native, data = full)
 tidy(mod) %>%
   kable(format = "markdown", digits = 6)
 ```
+The most significant predictor variables are poverty, medianhouseholdincome, medianhousevalue, pct_native, and pct_owner_occ. 
 
+For every 1 percent increase in the poverty rate, we expect the odds of a confirmed patient dying to increase by a multiplicative factor of exp(0.031076), holding all else constant.
