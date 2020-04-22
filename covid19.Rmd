@@ -1,5 +1,6 @@
 ---
 title: "covid19"
+authors: Diane Kim, Arielle Hutchinson, Priya Parkash
 output: html_document
 ---
 
@@ -12,9 +13,10 @@ library(tidyverse)
 library("dplyr")
 library(stringr)
 library(RCurl)
+library(betareg)
 ```
 ```{r load-data}
-date_of_study = "04-19-2020"
+date_of_study = "04-20-2020"
 
 covid_hist = read.csv(text=getURL("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/03-30-2020.csv"))
 covid_us_hist = subset(covid_hist, Country_Region == "US" & is.na(FIPS)==F)
@@ -29,6 +31,10 @@ pm_ave <- read_csv("county_pm_ave.csv")
 
 dem <- read_csv("co-est2019-alldata.csv")
 
+census <- read_csv("census_county_interpolated.csv")
+
+census_ave <- read_csv("census_ave.csv")
+
 
 ```
 
@@ -39,20 +45,55 @@ county_pm %>%
 covid_us <- covid_us %>%
   mutate(fips = FIPS)
 
-aggregate( fips ~ pm25, county_pm, mean )
+pm_mean = county_pm %>% 
+  group_by(fips) %>% 
+  summarise(pm25 = mean(pm25))
   
-full <- inner_join(covid_us, county_pm, by = "fips")
 ```
 
 ```{r deaths-proportion}
 covid_us <- covid_us %>%
-  group_by(Admin2) %>%
-  mutate(deaths_prop = Deaths/Confirmed)
+  group_by(fips) %>%
+  mutate(deaths_prop = (1+Deaths)/Confirmed) %>%
+  filter(deaths_prop<1 & !is.na(deaths_prop))
+
 ```
 
-```{r make_pm25_na}
-pm_ave %>%
-  mutate(pm25 = replace(pm25, pm25 == -99.000000, NA)) %>%
-  count(pm25 = "NA")
+```{r}
+fullset <- inner_join(covid_us, pm_mean, by = "fips")
+ggplot(data = fullset, mapping = aes(x = deaths_prop))+
+  geom_histogram()
+
+full <- inner_join(fullset, census_ave, by = "fips")
+
+ggplot(data = full, mapping = aes(x = poverty))+
+  geom_histogram()
+
+ggplot(data = full, mapping = aes(x = poverty, y = log(deaths_prop/(1-deaths_prop))))+
+  geom_point()
+
+model <- lm(deaths_prop ~ pm25, data = fullset)
+tidy(model) %>%
+  kable(format = "markdown", digits = 3)
+
+census %>%
+  count(fips)
+
+county_pm %>%
+  count(fips)
+
+full <- inner_join(fullset, census_ave, by = "fips")
+full <- full %>%
+  mutate(Conf = Confirmed / population)
+
+ggplot(data = full, mapping = aes(x = pct_asian, y = deaths_prop))+
+  geom_point()
+
+full_model <- betareg(deaths_prop ~ pm25 + poverty + pct_blk + medianhouseholdincome + medianhousevalue + hispanic + pct_native + pct_asian + pct_white + education + popdensity + poverty*pct_blk +poverty*pm25, data = full)
+tidy(full_model) %>%
+  kable(format = "markdown", digits = 6)
+
+
+
 ```
 
