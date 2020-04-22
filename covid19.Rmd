@@ -54,46 +54,40 @@ pm_mean = county_pm %>%
 ```{r deaths-proportion}
 covid_us <- covid_us %>%
   group_by(fips) %>%
-  mutate(deaths_prop = (1+Deaths)/Confirmed) %>%
-  filter(deaths_prop<1 & !is.na(deaths_prop))
-
+  mutate(mortality = (1+Deaths)/Confirmed) %>%
+  filter(mortality<1 & !is.na(mortality))
 ```
 
 ```{r}
 fullset <- inner_join(covid_us, pm_mean, by = "fips")
-ggplot(data = fullset, mapping = aes(x = deaths_prop))+
+ggplot(data = fullset, mapping = aes(x = mortality))+
   geom_histogram()
 
-full <- inner_join(fullset, census_ave, by = "fips")
+full <- inner_join(covid_us, census_ave, by = "fips")
+full <- full %>%
+  mutate(poverty = 100*poverty, medianhouseholdincome = medianhouseholdincome/1000, medianhousevalue = medianhousevalue/1000, pct_blk = pct_blk*100, pct_asian = pct_asian*100, pct_native = pct_native*100, hispanic = hispanic*100, pct_white = pct_white*100, education = education*100)
+```
+
+```{r eda}
+ggplot(data = full, mapping = aes(x = mortality))+
+  geom_histogram()+
+  labs(title = "Distribution of Mortality Rate", x = "Mortality", y = "Frequency")
 
 ggplot(data = full, mapping = aes(x = poverty))+
-  geom_histogram()
+  geom_histogram()+
+  labs(title = "Distribution of Poverty Rate", x = "Poverty Rate (in percentages)", y = "Frequency")
 
-ggplot(data = full, mapping = aes(x = poverty, y = log(deaths_prop/(1-deaths_prop))))+
+ggplot(data = full, mapping = aes(x = poverty, y = mortality))+
   geom_point()
 
-model <- lm(deaths_prop ~ pm25, data = fullset)
-tidy(model) %>%
-  kable(format = "markdown", digits = 3)
-
-census %>%
-  count(fips)
-
-county_pm %>%
-  count(fips)
-
-full <- inner_join(fullset, census_ave, by = "fips")
-full <- full %>%
-  mutate(Conf = Confirmed / population)
-
-ggplot(data = full, mapping = aes(x = pct_asian, y = deaths_prop))+
+ggplot(data = full, mapping = aes(x = pct_asian, y = mortality))+
   geom_point()
+```
 
-full_model <- betareg(deaths_prop ~ pm25 + poverty + pct_blk + medianhouseholdincome + medianhousevalue + hispanic + pct_native + pct_asian + pct_white + education + popdensity + poverty*pct_blk +poverty*pm25, data = full)
-tidy(full_model) %>%
+
+```{r betareg}
+mod <- betareg(mortality ~ poverty + medianhouseholdincome + medianhousevalue + hispanic + pct_asian + pct_white + pct_native + education + popdensity + poverty*pct_blk +poverty*pct_native, data = full)
+tidy(mod) %>%
   kable(format = "markdown", digits = 6)
-
-
-
 ```
 
