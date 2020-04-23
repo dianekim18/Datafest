@@ -53,12 +53,7 @@ covid_us <- covid_us %>%
   filter(mortality<1 & !is.na(mortality))
 ```
 
-```{r merge-datasets}
-fullset <- inner_join(covid_us, pm_mean, by = "fips")
-ggplot(data = fullset, mapping = aes(x = mortality))+
-  geom_histogram()+
-  labs(title = "Distribution of Mortality")
-
+``` {r merge-datasets}
 full <- inner_join(covid_us, census_ave, by = "fips")
 full <- full %>%
   mutate(poverty = 100*poverty, medianhouseholdincome = medianhouseholdincome/1000, medianhousevalue = medianhousevalue/1000, pct_blk = pct_blk*100, pct_asian = pct_asian*100, pct_native = pct_native*100, hispanic = hispanic*100, pct_white = pct_white*100, education = education*100, pct_owner_occ = pct_owner_occ*100)
@@ -66,13 +61,17 @@ full <- full %>%
 
 ## Exploratory Data Analysis
 
+
 ## Mortality Rates & Race
-```{r eda-mortality}
+```{r univariate-mortality}
 ggplot(data = full, mapping = aes(x = mortality))+
   geom_histogram(fill = "#15246b" )+
   labs(title = "Distribution of Mortality Rate", x = "Mortality", y = "Frequency") +
   theme_minimal()
+```
+This is our response variable, mortality. The distribution is unimodal and right-skewed with a few outliers.
 
+``` {r bivariate-mortality}
 ggplot(data = full, mapping = aes(x = hispanic, y = mortality)) +
   geom_point(color = "blue")+
   labs(title = "The Mortality Rates for Hispanics", 
@@ -191,10 +190,10 @@ tidy(mod) %>%
 ```
 The most significant predictor variables are poverty, medianhouseholdincome, medianhousevalue, pct_native, and pct_owner_occ. 
 
-For every 1 percent increase in the poverty rate, we expect the odds of a confirmed patient dying to increase by a multiplicative factor of exp(0.031076), holding all else constant.
+For every 1 percent increase in the poverty rate, we expect the odds of a confirmed patient dying to increase by a multiplicative factor of exp(0.031076) = 1.0316, holding all else constant.
 
-For every 1 percent increase in pct_native, we expect the odds of a confirmed patient dying to increase by a multiplicative factor of exp(0.051207), holding all else constant.
+For every 1 percent increase in pct_native, we expect the odds of a confirmed patient dying to increase by a multiplicative factor of exp(0.051207) = 1.0525, holding all else constant.
 
-For every additional $1000 in medianhouseholdincome, we expect the odds of a confirmed patient dying to change by a multiplicative factor of exp(-0.024998), holding all else constant.
+For every additional $1000 in medianhouseholdincome, we expect the odds of a confirmed patient dying to change by a multiplicative factor of exp(-0.024998) = 0.975, holding all else constant.
 
-For every additional $1000 in medianhousevalue, we expect the odds of a confirmed patient dying to change by a multiplicative factor of exp(-0.001367), holding all else constant.
+For every additional $1000 in medianhousevalue, we expect the odds of a confirmed patient dying to change by a multiplicative factor of exp(-0.001367) = 0.9986, holding all else constant.
