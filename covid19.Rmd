@@ -1,5 +1,5 @@
 ---
-title: "covid19"
+title: "Covid-19 Mortality: An Analysis of Demographic Data"
 authors: Diane Kim, Arielle Hutchinson, Priya Parkash
 output: html_document
 ---
@@ -33,6 +33,7 @@ pm_ave <- read_csv("county_pm_ave.csv")
 census <- read_csv("census_county_interpolated.csv")
 
 census_ave <- read_csv("census_ave.csv")
+#code for computing averages located in census_ave.java file
 ```
 
 ```{r clean-up-data}
@@ -55,7 +56,8 @@ covid_us <- covid_us %>%
 ```{r merge-datasets}
 fullset <- inner_join(covid_us, pm_mean, by = "fips")
 ggplot(data = fullset, mapping = aes(x = mortality))+
-  geom_histogram()
+  geom_histogram()+
+  labs(title = "Distribution of Mortality")
 
 full <- inner_join(covid_us, census_ave, by = "fips")
 full <- full %>%
@@ -90,8 +92,8 @@ ggplot(data = full, mapping = aes(x = pct_native, y = mortality) )+
   theme_minimal()
 
 ```
+There is no apparent relationship between racial group and mortality rate.
 
-im confused. why do these all look so wierd??? also what should the title of these be?
 
 
 ## Mortality, Home-ownership, & Income
