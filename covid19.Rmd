@@ -190,3 +190,9 @@ tidy(mod) %>%
 The most significant predictor variables are poverty, medianhouseholdincome, medianhousevalue, pct_native, and pct_owner_occ. 
 
 For every 1 percent increase in the poverty rate, we expect the odds of a confirmed patient dying to increase by a multiplicative factor of exp(0.031076), holding all else constant.
+
+For every 1 percent increase in pct_native, we expect the odds of a confirmed patient dying to increase by a multiplicative factor of exp(0.051207), holding all else constant.
+
+For every additional $1000 in medianhouseholdincome, we expect the odds of a confirmed patient dying to change by a multiplicative factor of exp(-0.024998), holding all else constant.
+
+For every additional $1000 in medianhousevalue, we expect the odds of a confirmed patient dying to change by a multiplicative factor of exp(-0.001367), holding all else constant.
